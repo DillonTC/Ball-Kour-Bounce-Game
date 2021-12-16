@@ -50,9 +50,13 @@ class KeyboardState {
 }
 
 class Player {
-	/** @param {Array<SafePlatform>} [platforms] */
-	constructor(platforms) {
+	/**
+	 * @param {Array<SafePlatform>} [platforms]
+	 * @param {Array<KillPlatform>} killers]
+	 */
+	constructor(platforms, killers) {
 	this.platforms = platforms;
+	this.killers = killers;
 	this.maxBounceHeight = canvas.height / 2;
 	this.yOfLastBounce = 0;
 	this.x = canvas.width * 0.25;
@@ -325,6 +329,41 @@ class ScorePlatform {
 	}
 }
 
+class KillPlatform {
+/**
+* @param {Game} g
+*/
+constructor(g) {
+this.game = g;
+this.width = 32;
+this.height = canvas.height;
+
+this.x = 0;
+this.y = canvas.height - 100;
+
+this.isVisible = true;
+
+this.isScored = false;
+this.isScorable = false;
+}
+
+/**
+* @param {number} elapsedTime
+*/
+update(elapsedTime) {
+this.x -= this.game.speed;
+this.isVisible = this.x + this.width > 0;
+}
+
+render() {
+if(!this.isVisible) return;
+ctx.save();
+ctx.fillStyle = "hsla(0, 100%, 50%, 1)";
+ctx.fillRect(this.x, this.y, this.width, this.height);
+ctx.restore();
+}
+}
+
 class PlatformManager {
     constructor(platforms, game) {
         this.platforms = platforms;
@@ -358,9 +397,10 @@ class PlatformManager {
 let kb = new KeyboardState();
 let game = new Game(kb);
 
+let killers = [new KillPlatform(game)];
 let platforms = [new SafePlatform(game)];
 let pm = new PlatformManager(platforms, game);
-let player = new Player(platforms);
+let player = new Player(platforms, killers);
 let tracers = [new Tracer(player, game)];
 
 let currentTime = 0;
